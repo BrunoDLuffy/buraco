@@ -1,6 +1,6 @@
 // Service worker: guarda os arquivos do jogo no aparelho para abrir rápido e jogar contra bots sem internet.
 // Ao publicar uma versão nova, aumente o número abaixo.
-const VERSION = 'buraco-v3';
+const VERSION = 'buraco-v4';
 
 const FILES = [
   './',
