@@ -18,7 +18,7 @@ export function logoHTML() {
   </div>`;
 }
 
-export function homeHTML({ hasSaved, savedRoom, onlineReady }) {
+export function homeHTML({ hasSaved, savedRoom, onlineReady, canInstall }) {
   return `<div class="screen home">
     ${logoHTML()}
     <div class="menu-list">
@@ -30,8 +30,37 @@ export function homeHTML({ hasSaved, savedRoom, onlineReady }) {
         <button class="btn ghost" data-go="rules">Regras</button>
         <button class="btn ghost" data-go="settings">Configurações</button>
       </div>
+      ${canInstall ? `<button class="btn ghost install-btn" data-go="install">${installIcon()} Instalar na tela inicial</button>` : ''}
     </div>
   </div>`;
+}
+
+function installIcon() {
+  return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+// Passo a passo para quem não tem o botão automático de instalar (iPhone, ou navegador sem suporte).
+export function installHelpHTML(platform) {
+  const steps = {
+    ios: [
+      'Abra este site no <b>Safari</b> (no iPhone, a instalação funciona melhor por ele).',
+      'Toque em <b>Compartilhar</b>: o quadrado com uma seta para cima, na barra de baixo.',
+      'Role a lista e toque em <b>Adicionar à Tela de Início</b>.',
+      'Toque em <b>Adicionar</b>. O ícone do Buraco aparece junto com os seus apps.',
+    ],
+    android: [
+      'No Chrome, toque nos <b>três pontinhos ⋮</b> no canto de cima.',
+      'Toque em <b>Adicionar à tela inicial</b> (ou <b>Instalar app</b>).',
+      'Confirme em <b>Instalar</b> ou <b>Adicionar</b>.',
+    ],
+    desktop: [
+      'No Chrome ou no Edge, clique no ícone de <b>instalar</b> (um monitor com uma seta) no canto direito da barra de endereço.',
+      'Ou abra o menu <b>⋮</b> → <b>Transmitir, salvar e compartilhar</b> → <b>Instalar página como app</b>.',
+    ],
+  }[platform];
+  return `<h2>Instalar na tela inicial</h2>
+    <ol class="install-steps">${steps.map((t) => `<li>${t}</li>`).join('')}</ol>
+    <p class="muted">Depois é só abrir pelo ícone, como qualquer app, e sem a barra do navegador.</p>`;
 }
 
 // Seletor de regras, usado no jogo contra bots e na sala online.

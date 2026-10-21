@@ -1630,3 +1630,21 @@ body.in-game .toast {
   text-align: center;
   color: #ffb3a8;
 }
+
+/* ---------- instalar na tela inicial ---------- */
+.install-btn {
+  border-style: dashed;
+  color: var(--gold);
+}
+.install-steps {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.4;
+  text-align: left;
+}
+.install-steps b {
+  color: var(--gold);
+}

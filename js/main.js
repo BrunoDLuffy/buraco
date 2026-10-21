@@ -3,7 +3,7 @@
 import { buildRules, VARIANTS } from './engine/rules.js';
 import { tableFeltCSS } from './ui/cardArt.js';
 import { loadSettings, saveSettings, storeGet, storeSet } from './settings.js';
-import { homeHTML, setupHTML, onlineHTML, lobbyHTML, rulesScreenHTML, settingsHTML } from './ui/menus.js';
+import { homeHTML, installHelpHTML, setupHTML, onlineHTML, lobbyHTML, rulesScreenHTML, settingsHTML } from './ui/menus.js';
 import { mountGame } from './ui/gameView.js';
 import { LocalGame } from './controllers/local.js';
 import { Room, HostController, ClientController, botName, normalizeCode } from './net/room.js';
@@ -59,7 +59,12 @@ function show(screen) {
 function render() {
   switch (app.screen) {
     case 'home':
-      appEl.innerHTML = homeHTML({ hasSaved: !!storeGet(SAVE_LOCAL), savedRoom: onlineReady() ? storeGet(SAVE_ROOM) : null, onlineReady: onlineReady() });
+      appEl.innerHTML = homeHTML({
+        hasSaved: !!storeGet(SAVE_LOCAL),
+        savedRoom: onlineReady() ? storeGet(SAVE_ROOM) : null,
+        onlineReady: onlineReady(),
+        canInstall: !isInstalled(),
+      });
       break;
     case 'setup':
       appEl.innerHTML = setupHTML(app.setup);
@@ -137,6 +142,8 @@ appEl.addEventListener('click', async (e) => {
       return show(where);
     case 'online':
       return show('online');
+    case 'install':
+      return installApp();
     case 'resume':
       return resumeLocal();
     case 'startLocal':
@@ -546,6 +553,62 @@ function startClient(room) {
   mountGameScreen(ctrl, {
     online: ctrl,
     onExit: () => leaveRoom(),
+  });
+}
+
+// ---------------- instalar na tela inicial ----------------
+
+let installPrompt = null; // aviso de instalação do Chrome/Edge (Android e computador)
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  if (app.screen === 'home') render();
+});
+
+window.addEventListener('appinstalled', () => {
+  installPrompt = null;
+  toast('Pronto! O Buraco está na sua tela inicial.');
+  if (app.screen === 'home') render();
+});
+
+function isInstalled() {
+  return (
+    matchMedia('(display-mode: standalone)').matches ||
+    matchMedia('(display-mode: fullscreen)').matches ||
+    navigator.standalone === true
+  );
+}
+
+function platform() {
+  const ua = navigator.userAgent;
+  if (/iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+  if (/android/i.test(ua)) return 'android';
+  return 'desktop';
+}
+
+async function installApp() {
+  if (installPrompt) {
+    installPrompt.prompt();
+    try {
+      await installPrompt.userChoice;
+    } catch {
+      /* usuário fechou o aviso */
+    }
+    installPrompt = null;
+    return;
+  }
+  showInfoModal(installHelpHTML(platform()));
+}
+
+function showInfoModal(html) {
+  document.querySelector('.modal.info-modal')?.remove();
+  const modal = document.createElement('div');
+  modal.className = 'modal info-modal';
+  modal.innerHTML = `<div class="panel">${html}<button class="btn primary" type="button" data-close>Entendi</button></div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal || e.target.closest('[data-close]')) modal.remove();
   });
 }
 
