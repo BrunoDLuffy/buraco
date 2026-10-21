@@ -49,6 +49,10 @@ const onlineReady = () => TEST_ONLINE || !!firebaseConfig;
 // ---------------- navegação ----------------
 
 function show(screen) {
+  if (app.pendingReload && screen !== 'game') {
+    location.reload();
+    return;
+  }
   app.screen = screen;
   document.body.classList.toggle('in-game', screen === 'game');
   if (screen !== 'game') leaveGameMode();
@@ -615,6 +619,19 @@ function showInfoModal(html) {
 // ---------------- início ----------------
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  // Quando chega uma versão nova do jogo, recarrega para usá-la (mas nunca no meio de uma partida).
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloaded) return;
+    if (app.screen === 'game') {
+      toast('Saiu uma versão nova do jogo. Ela será usada quando você voltar ao menu.', 'info', 4000);
+      app.pendingReload = true;
+      return;
+    }
+    reloaded = true;
+    location.reload();
+  });
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 

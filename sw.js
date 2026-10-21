@@ -1,6 +1,6 @@
 // Service worker: guarda os arquivos do jogo no aparelho para abrir rápido e jogar contra bots sem internet.
 // Ao publicar uma versão nova, aumente o número abaixo.
-const VERSION = 'buraco-v5';
+const VERSION = 'buraco-v6';
 
 const FILES = [
   './',
@@ -34,7 +34,13 @@ const FILES = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: 'reload' ignora o cache do navegador, para guardar sempre a versão que acabou de ser publicada
+  e.waitUntil(
+    caches
+      .open(VERSION)
+      .then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' }))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {
@@ -47,11 +53,13 @@ self.addEventListener('activate', (e) => {
 });
 
 // Arquivos do próprio site: tenta a rede primeiro (para pegar atualizações) e usa o cache sem internet.
+// cache: 'no-cache' faz o navegador sempre conferir com o site se o arquivo mudou
+// (o GitHub Pages mandaria guardar cada arquivo por 10 minutos).
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: 'no-cache' })
       .then((res) => {
         const copy = res.clone();
         caches.open(VERSION).then((c) => c.put(e.request, copy));
