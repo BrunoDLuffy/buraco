@@ -562,11 +562,11 @@ function startClient(room) {
 
 // ---------------- instalar na tela inicial ----------------
 
-let installPrompt = null; // aviso de instalação do Chrome/Edge (Android e computador)
+// Aviso de instalação do Chrome/Edge (Android e computador), capturado no index.html.
+let installPrompt = window.__installPrompt || null;
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  installPrompt = e;
+window.addEventListener('buraco-installable', () => {
+  installPrompt = window.__installPrompt;
   if (app.screen === 'home') render();
 });
 
@@ -600,6 +600,7 @@ async function installApp() {
       /* usuário fechou o aviso */
     }
     installPrompt = null;
+    window.__installPrompt = null;
     return;
   }
   showInfoModal(installHelpHTML(platform()));

@@ -50,7 +50,8 @@ export function installHelpHTML(platform) {
     ],
     android: [
       'No Chrome, toque nos <b>três pontinhos ⋮</b> no canto de cima.',
-      'Toque em <b>Adicionar à tela inicial</b> (ou <b>Instalar app</b>).',
+      'Procure <b>Instalar app</b>, <b>Adicionar à tela inicial</b> ou <b>Instalar e criar atalho</b> (o nome muda conforme a versão do Chrome).',
+      'Se não achar no menu, toque em <b>Compartilhar…</b> e procure <b>Adicionar à tela inicial</b>.',
       'Confirme em <b>Instalar</b> ou <b>Adicionar</b>.',
     ],
     desktop: [
